@@ -15,7 +15,6 @@ Bad category - 10
 import datetime
 import re
 import sqlite3
-from sqlite3 import IntegrityError
 
 
 # ==============================================================
@@ -28,7 +27,6 @@ def create_db_connection(path: str) -> sqlite3.Connection:
 
 	dbconn = sqlite3.connect(path)
 	return dbconn
-
 
 
 # ==============================================================
@@ -44,43 +42,56 @@ def select_pur_item(dbconn: sqlite3.Connection, id: int):
 	except Exception:
 		raise Exception(7, "Bad/empty id")
 	
-	cursor = dbconn.cursor()
-	cursor.execute('SELECT * FROM purchases WHERE id = {}'.format(id))
-	purchase = cursor.fetchone()
-	cursor.close()
+	try:
+		cursor = dbconn.cursor()
+		cursor.execute('SELECT * FROM purchases WHERE id = {}'.format(id))
+		purchase = cursor.fetchone()
+	except Exception as exp:
+		raise exp
+	finally:
+		cursor.close()
 	return purchase
 
 
 def select_all_purchases(dbconn: sqlite3.Connection) -> list:
 	"""show purchases table"""
 
-	cursor = dbconn.cursor()
-	cursor.execute('SELECT id, date(date), product, cost, sum FROM purchases')
-	all_purchases = cursor.fetchall()
-	cursor.close()
+	try:
+		cursor = dbconn.cursor()
+		cursor.execute('SELECT id, date(date), product, cost, sum FROM purchases')
+		all_purchases = cursor.fetchall()
+	except Exception as exp:
+		raise exp
+	finally:
+		cursor.close()
 	return all_purchases
 	
 	
 def select_all_categories(dbconn: sqlite3.Connection) -> list:
 	"""show categories table"""
 	
-	cursor = dbconn.cursor()
-	cursor.execute('SELECT * FROM categories')
-	all_categories = cursor.fetchall()
-	cursor.close()
+	try:
+		cursor = dbconn.cursor()
+		cursor.execute('SELECT * FROM categories')
+		all_categories = cursor.fetchall()
+	except Exception as exp:
+		raise exp
+	finally:
+		cursor.close()
 	return all_categories
 	
 
 def select_category_by_product(dbconn: sqlite3.Connection, product: str):
 	"""find category for product"""
 	
-	cursor = dbconn.cursor()
 	try:
+		cursor = dbconn.cursor()
 		cursor.execute("SELECT * FROM categories WHERE product = '{}'".format(product))
-	except Exception as excp:
-		print(excp.args)
-	category = cursor.fetchone()
-	cursor.close()
+		category = cursor.fetchone()
+	except Exception as exp:
+		raise exp
+	finally:
+		cursor.close()
 	
 	return category
 
@@ -126,9 +137,13 @@ def insert_into_purchases(dbconn: sqlite3.Connection, date: str, product: str, c
 		raise Exception(6, "Cost/sum less then zero")
 	#======================================================
 
-	cursor = dbconn.cursor()
-	cursor.execute("INSERT INTO purchases (date, product, cost, sum) VALUES(date('{}'), '{}', '{}', '{}')".format(date, product, cost, sum))	  
-	cursor.close()
+	try:
+		cursor = dbconn.cursor()
+		cursor.execute("INSERT INTO purchases (date, product, cost, sum) VALUES(date('{}'), '{}', '{}', '{}')".format(date, product, cost, sum))	  
+	except Exception as exp:
+		raise exp
+	finally:
+		cursor.close()
 	dbconn.commit()
 
 
@@ -141,9 +156,13 @@ def delete_from_purchases(dbconn: sqlite3.Connection, id: int):
 	except Exception:
 		raise Exception(7, "Bad/empty id")
 
-	cursor = dbconn.cursor()
-	cursor.execute('DELETE FROM purchases WHERE id = {}'.format(id))
-	cursor.close()
+	try:
+		cursor = dbconn.cursor()
+		cursor.execute('DELETE FROM purchases WHERE id = {}'.format(id))
+	except Exception as exp:
+		raise exp
+	finally:
+		cursor.close()
 	dbconn.commit()
 	
 
@@ -179,9 +198,13 @@ def update_purchases(dbconn: sqlite3.Connection, id: int, data: tuple):
 		raise Exception(6, "Cost/sum less then zero")
 	#======================================================
 	
-	cursor = dbconn.cursor()
-	cursor.execute("UPDATE purchases set date = date('{}'), product = '{}', cost = '{}', sum = '{}' where id = {}".format(date, product, cost, sum, id))
-	cursor.close()
+	try:
+		cursor = dbconn.cursor()
+		cursor.execute("UPDATE purchases set date = date('{}'), product = '{}', cost = '{}', sum = '{}' where id = {}".format(date, product, cost, sum, id))
+	except Exception as exp:
+		raise exp
+	finally:
+		cursor.close()
 	dbconn.commit()
 	
 	
@@ -192,8 +215,12 @@ def insert_into_categories(dbconn: sqlite3.Connection, product: str, category: s
 	if not re.match(r'^\w+', category, flags=0):
 		raise Exception(10, "Bad category")
 
-	cursor = dbconn.cursor()
-	cursor.execute("INSERT INTO categories(product, category) VALUES('{}', '{}')".format(product, category))
-	cursor.close()
+	try:
+		cursor = dbconn.cursor()
+		cursor.execute("INSERT INTO categories(product, category) VALUES('{}', '{}')".format(product, category))
+	except Exception as exp:
+		raise exp
+	finally:
+		cursor.close()
 	
 	dbconn.commit()
