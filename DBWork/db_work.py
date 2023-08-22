@@ -22,8 +22,9 @@ from sqlite3 import IntegrityError
 # Exception processing
 # ==============================================================
 
-# Decorator check arguments no empty
 def argsNoEmpty(func):
+	"""Decorator check arguments no empty"""
+
 	def decorated(**kwargs):
 		date, product, cost, sum = kwargs.get('data')
 		if date == '':
@@ -41,8 +42,9 @@ def argsNoEmpty(func):
 	return decorated
 	
 	
-# Decorator check arguments value
 def argsNoBad(func):
+	"""Decorator check arguments value"""
+
 	def decorated(**kwargs):
 		date, product, cost, sum = kwargs.get('data')
 		try:
@@ -70,8 +72,9 @@ def argsNoBad(func):
 	return decorated
 	
 
-# Decorator ID errors catching
 def catchIDerror(func):
+	"""Decorator ID errors catching"""
+
 	def decorated(**kwargs):
 		id = kwargs.get("id")
 		try:
@@ -84,8 +87,10 @@ def catchIDerror(func):
 	return decorated
 	
 
-# Decorator NoData errors catching
+
 def catchNoDataerror(func):
+	"""Decorator NoData errors catching"""
+
 	def decorated(**kwargs):
 		res = func(**kwargs)
 		if res:
@@ -95,8 +100,10 @@ def catchNoDataerror(func):
 	return decorated
 
 
-# Decorator check category arguments
+
 def argsCategory(func):
+	"""Decorator check category arguments"""
+	
 	def decorated(**kwargs):
 		product, category = kwargs.get('data')
 		if not re.match(r'^\w+', category, flags=0):
@@ -113,8 +120,10 @@ def argsCategory(func):
 # Work with database
 # ==============================================================
 
-#create database_connection
-def create_db_connection(path):
+
+def create_db_connection(path: str) -> sqlite3.Connection:
+	"""create database_connection"""
+
 	dbconn = sqlite3.connect(path)
 	return dbconn
 
@@ -124,10 +133,11 @@ def create_db_connection(path):
 # Select data
 # ==============================================================
 
-#select purchase item by id
+
 @catchIDerror
 @catchNoDataerror
 def select_pur_item(**kwargs):
+	"""select purchase item by id"""
 	dbconn = kwargs.get("dbconn")
 	id = kwargs.get("id")
 	cursor = dbconn.cursor()
@@ -136,9 +146,11 @@ def select_pur_item(**kwargs):
 	cursor.close()
 	return purchase
 
-# show purchases table
+
 @catchNoDataerror
 def select_all_purchases(**kwargs):
+	"""show purchases table"""
+
 	dbconn = kwargs.get("dbconn")
 	cursor = dbconn.cursor()
 	cursor.execute('SELECT id, date(date), product, cost, sum FROM purchases')
@@ -147,9 +159,10 @@ def select_all_purchases(**kwargs):
 	return all_purchases
 	
 	
-# show categories table
+
 @catchNoDataerror
 def select_all_categories(**kwargs):
+	"""show categories table"""
 	dbconn = kwargs.get("dbconn")
 	cursor = dbconn.cursor()
 	cursor.execute('SELECT * FROM categories')
@@ -157,9 +170,11 @@ def select_all_categories(**kwargs):
 	cursor.close()
 	return all_categories
 	
-# find category for product
+
 @catchNoDataerror
 def select_category_by_product(**kwargs):
+	"""find category for product"""
+
 	dbconn = kwargs.get("dbconn")
 	product = kwargs.get("product")
 	
@@ -179,10 +194,12 @@ def select_category_by_product(**kwargs):
 # Insert Delete Update
 # ==============================================================
 
-#insert into PURCHASES table
+
 @argsNoEmpty
 @argsNoBad
 def insert_into_purchases(**kwargs):
+	"""insert into PURCHASES table"""
+
 	dbconn = kwargs.get("dbconn")
 	date, product, cost, sum = kwargs.get("data")
 	
@@ -191,9 +208,10 @@ def insert_into_purchases(**kwargs):
 	cursor.close()
 	dbconn.commit()
 
-#delete from PURCHASES table
+
 @catchIDerror
 def delete_from_purchases(**kwargs):
+	"""delete from PURCHASES table"""
 	dbconn = kwargs.get("dbconn")
 	id = kwargs.get("id")
 	cursor = dbconn.cursor()
@@ -201,10 +219,11 @@ def delete_from_purchases(**kwargs):
 	cursor.close()
 	dbconn.commit()
 	
-# update PURCHASES
+
 @catchIDerror
 @argsNoBad
 def update_purchases(**kwargs):
+	"""update PURCHASES"""
 	dbconn = kwargs.get("dbconn")
 	id = kwargs.get("id")
 	data = kwargs.get("data")
@@ -215,9 +234,10 @@ def update_purchases(**kwargs):
 	dbconn.commit()
 	
 		
-#insert into CATEGORIES
+
 @argsCategory	
 def insert_into_categories(**kwargs):
+	"""insert into CATEGORIES"""
 	dbconn = kwargs.get("dbconn")
 	product, category = kwargs.get("data")
 	
