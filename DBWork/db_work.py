@@ -136,10 +136,9 @@ def create_db_connection(path: str) -> sqlite3.Connection:
 
 @catchIDerror
 @catchNoDataerror
-def select_pur_item(**kwargs):
+def select_pur_item(dbconn: sqlite3.Connection, id: int):
 	"""select purchase item by id"""
-	dbconn = kwargs.get("dbconn")
-	id = kwargs.get("id")
+
 	cursor = dbconn.cursor()
 	cursor.execute('SELECT * FROM purchases WHERE id = {}'.format(id))
 	purchase = cursor.fetchone()
@@ -148,10 +147,9 @@ def select_pur_item(**kwargs):
 
 
 @catchNoDataerror
-def select_all_purchases(**kwargs):
+def select_all_purchases(dbconn: sqlite3.Connection) -> list:
 	"""show purchases table"""
 
-	dbconn = kwargs.get("dbconn")
 	cursor = dbconn.cursor()
 	cursor.execute('SELECT id, date(date), product, cost, sum FROM purchases')
 	all_purchases = cursor.fetchall()
@@ -161,9 +159,9 @@ def select_all_purchases(**kwargs):
 	
 
 @catchNoDataerror
-def select_all_categories(**kwargs):
+def select_all_categories(dbconn: sqlite3.Connection) -> list:
 	"""show categories table"""
-	dbconn = kwargs.get("dbconn")
+	
 	cursor = dbconn.cursor()
 	cursor.execute('SELECT * FROM categories')
 	all_categories = cursor.fetchall()
@@ -172,11 +170,8 @@ def select_all_categories(**kwargs):
 	
 
 @catchNoDataerror
-def select_category_by_product(**kwargs):
+def select_category_by_product(dbconn: sqlite3.Connection, product: str):
 	"""find category for product"""
-
-	dbconn = kwargs.get("dbconn")
-	product = kwargs.get("product")
 	
 	cursor = dbconn.cursor()
 	try:
@@ -197,11 +192,8 @@ def select_category_by_product(**kwargs):
 
 @argsNoEmpty
 @argsNoBad
-def insert_into_purchases(**kwargs):
+def insert_into_purchases(dbconn: sqlite3.Connection, date: str, product: str, cost: float, sum: float):
 	"""insert into PURCHASES table"""
-
-	dbconn = kwargs.get("dbconn")
-	date, product, cost, sum = kwargs.get("data")
 	
 	cursor = dbconn.cursor()
 	cursor.execute("INSERT INTO purchases (date, product, cost, sum) VALUES(date('{}'), '{}', '{}', '{}')".format(date, product, cost, sum))	  
@@ -210,10 +202,9 @@ def insert_into_purchases(**kwargs):
 
 
 @catchIDerror
-def delete_from_purchases(**kwargs):
+def delete_from_purchases(dbconn: sqlite3.Connection, id: int):
 	"""delete from PURCHASES table"""
-	dbconn = kwargs.get("dbconn")
-	id = kwargs.get("id")
+	
 	cursor = dbconn.cursor()
 	cursor.execute('DELETE FROM purchases WHERE id = {}'.format(id))
 	cursor.close()
@@ -222,11 +213,8 @@ def delete_from_purchases(**kwargs):
 
 @catchIDerror
 @argsNoBad
-def update_purchases(**kwargs):
+def update_purchases(dbconn: sqlite3.Connection, id: int, data: tuple):
 	"""update PURCHASES"""
-	dbconn = kwargs.get("dbconn")
-	id = kwargs.get("id")
-	data = kwargs.get("data")
 	
 	cursor = dbconn.cursor()
 	cursor.execute("UPDATE purchases set date = date('{}'), product = '{}', cost = '{}', sum = '{}' where id = {}".format(data[0], data[1], data[2], data[3], id))
@@ -236,10 +224,8 @@ def update_purchases(**kwargs):
 		
 
 @argsCategory	
-def insert_into_categories(**kwargs):
+def insert_into_categories(dbconn: sqlite3.Connection, product: str, category: str):
 	"""insert into CATEGORIES"""
-	dbconn = kwargs.get("dbconn")
-	product, category = kwargs.get("data")
 	
 	cursor = dbconn.cursor()
 	cursor.execute("INSERT INTO categories(product, category) VALUES('{}', '{}')".format(product, category))
