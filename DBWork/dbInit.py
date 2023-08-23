@@ -1,6 +1,23 @@
 import sqlite3
+import sys
+from PyQt5.QtWidgets import (QMainWindow, QFileDialog, QApplication)
 
-dbconn = sqlite3.connect('DB/expenses.db')
+
+class SelectDBPath(QMainWindow):
+
+    def __init__(self):
+        super().__init__()
+        self.path = QFileDialog.getExistingDirectory(self,"Select DB destination",".")
+
+app = QApplication(sys.argv)
+DBPath = SelectDBPath()
+
+path = DBPath.path + "/expenses.db"
+
+with open("DBWork/DBPath.txt", "w") as dbp:
+    dbp.write(path)
+
+dbconn = sqlite3.connect(path)
 cur = dbconn.cursor()
 
 cur.execute("""CREATE TABLE IF NOT EXISTS categories (
