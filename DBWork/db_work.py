@@ -27,14 +27,8 @@ class DBWork:
 	# Select data
 	# ==============================================================
 
-	def select_pur_item(self, id: int):
+	def select_pur_item(self, id: int) -> tuple[int, str, str, float, float] | None:
 		"""select purchase item by id"""
-
-		# Check ID
-		try:
-			check = int(id)
-		except Exception:
-			raise Exception(7, "Bad/empty id")
 		
 		try:
 			cursor = self.dbconn.cursor()
@@ -47,7 +41,7 @@ class DBWork:
 		return purchase
 
 
-	def select_all_purchases(self) -> list:
+	def select_all_purchases(self) -> list[tuple[int, str, str, float, float]] | None:
 		"""show purchases table"""
 
 		try:
@@ -61,7 +55,7 @@ class DBWork:
 		return all_purchases
 		
 		
-	def select_all_categories(self) -> list:
+	def select_all_categories(self) -> list[tuple[str,str]] | None:
 		"""show categories table"""
 		
 		try:
@@ -75,7 +69,7 @@ class DBWork:
 		return all_categories
 		
 
-	def select_category_by_product(self, product: str):
+	def select_category_by_product(self, product: str) -> tuple[str, str] | None:
 		"""find category for product"""
 		
 		try:
@@ -96,7 +90,7 @@ class DBWork:
 	# ==============================================================
 
 
-	def insert_into_purchases(self, date: str, product: str, cost: float, sum: float):
+	def insert_into_purchases(self, date: str, product: str, cost: float, sum: float) -> None:
 		"""insert into PURCHASES table"""
 		
 		# Check arguments
@@ -107,7 +101,7 @@ class DBWork:
 		if product == '': 
 			raise Exception(3, "Empty product")
 		sum = sum if sum else cost
-		if cost == '':
+		if cost is None:
 			raise Exception(5, "Empty cost/sum or bad format")
 		
 		#======================================================
@@ -141,15 +135,9 @@ class DBWork:
 		self.dbconn.commit()
 
 
-	def delete_from_purchases(self, id: int):
+	def delete_from_purchases(self, id: int) -> None:
 		"""delete from PURCHASES table"""
 		
-		# Check ID
-		try:
-			check = int(id)
-		except Exception:
-			raise Exception(7, "Bad/empty id")
-
 		try:
 			cursor = self.dbconn.cursor()
 			cursor.execute('DELETE FROM purchases WHERE id = {}'.format(id))
@@ -160,17 +148,9 @@ class DBWork:
 		self.dbconn.commit()
 		
 
-	def update_purchases(self, id: int, data: tuple):
+	def update_purchases(self, id: int, date: str, product: str, cost: float, sum: float) -> None:
 		"""update PURCHASES"""
 
-		date, product, cost, sum = data
-
-		# Check ID
-		try:
-			check = int(id)
-		except Exception:
-			raise Exception(7, "Bad/empty id")
-		
 		#======================================================
 		try:
 			check = datetime.date.fromisoformat(date)
@@ -202,7 +182,7 @@ class DBWork:
 		self.dbconn.commit()
 		
 		
-	def insert_into_categories(self, product: str, category: str):
+	def insert_into_categories(self, product: str, category: str) -> None:
 		"""insert into CATEGORIES"""
 		
 		# Check category
