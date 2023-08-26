@@ -1,15 +1,9 @@
 """
 Errors:
 Empty date or bad format - 1
-Future date - 2
 Empty product - 3
-Bad product - 4
 Empty cost/sum or bad format - 5
 Cost/sum less then zero - 6
-Bad/empty id - 7
-No data found - 8
-No corresponding category - 9
-Bad category - 10
 """
 
 import datetime
@@ -93,9 +87,7 @@ class DBWork:
 	def insert_into_purchases(self, date: str, product: str, cost: float, sum: float) -> None:
 		"""insert into PURCHASES table"""
 		
-		# Check arguments
-
-		#=====================================================
+		#=================== Data is not empty ================
 		if date == '':
 			raise Exception(1, "Empty date or bad format")
 		if product == '': 
@@ -104,23 +96,11 @@ class DBWork:
 		if cost is None:
 			raise Exception(5, "Empty cost/sum or bad format")
 		
-		#======================================================
+		#=================== Value validation =================
 		try:
 			check = datetime.date.fromisoformat(date)
 		except Exception:
 			raise Exception(1, "Empty date or bad format")
-		if datetime.date.fromisoformat(date) > datetime.date.today():
-			raise Exception(2, "Future date")
-		if not re.match(r'^\w+', product, flags=0):
-			raise Exception(4, "Bad product")
-		try:
-			category = self.select_category_by_product(product)
-		except Exception:
-			raise Exception(9, 'No corresponding category')
-		try:
-			check = float(cost); check = float(sum)
-		except Exception:
-			raise Exception(5, "Empty cost/sum or bad format")
 		if (float(cost) < 0) or (float(sum) < 0):
 			raise Exception(6, "Cost/sum less then zero")
 		#======================================================
@@ -151,23 +131,20 @@ class DBWork:
 	def update_purchases(self, id: int, date: str, product: str, cost: float, sum: float) -> None:
 		"""update PURCHASES"""
 
-		#======================================================
+		#=================== Data is not empty ================
+		if date == '':
+			raise Exception(1, "Empty date or bad format")
+		if product == '': 
+			raise Exception(3, "Empty product")
+		sum = sum if sum else cost
+		if cost is None:
+			raise Exception(5, "Empty cost/sum or bad format")
+		
+		#=================== Value validation =================
 		try:
 			check = datetime.date.fromisoformat(date)
 		except Exception:
 			raise Exception(1, "Empty date or bad format")
-		if datetime.date.fromisoformat(date) > datetime.date.today():
-			raise Exception(2, "Future date")
-		if not re.match(r'^\w+', product, flags=0):
-			raise Exception(4, "Bad product")
-		try:
-			category = self.select_category_by_product(product)
-		except Exception:
-			raise Exception(9, 'No corresponding category')
-		try:
-			check = float(cost); check = float(sum)
-		except Exception:
-			raise Exception(5, "Empty cost/sum or bad format")
 		if (float(cost) < 0) or (float(sum) < 0):
 			raise Exception(6, "Cost/sum less then zero")
 		#======================================================
@@ -186,9 +163,6 @@ class DBWork:
 		"""insert into CATEGORIES"""
 		
 		# Check category
-		if not re.match(r'^\w+', category, flags=0):
-			raise Exception(10, "Bad category")
-
 		try:
 			cursor = self.dbconn.cursor()
 			cursor.execute("INSERT INTO categories(product, category) VALUES('{}', '{}')".format(product, category))
