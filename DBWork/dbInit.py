@@ -7,7 +7,8 @@ class SelectDBPath(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.path = QFileDialog.getExistingDirectory(self,"Select DB destination",".")
+        self.path = QFileDialog.getExistingDirectory(self, "Select DB destination", ".")
+
 
 app = QApplication(sys.argv)
 DBPath = SelectDBPath()
@@ -29,7 +30,7 @@ cur.execute("""CREATE TABLE IF NOT EXISTS categories (
 cur.execute("""CREATE TABLE IF NOT EXISTS purchases (
    id INTEGER,
    date TEXT NOT NULL,
-   product TEXT NOT NULL,   
+   product TEXT NOT NULL,
    cost REAL NOT NULL,
    sum REAL NOT NULL,
    CONSTRAINT product_fk FOREIGN KEY (product) REFERENCES categories(product),
