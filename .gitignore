@@ -1,3 +1,6 @@
+# user files
+.test*
+
 # auxiliary files
 DB/
 DBPath.txt
