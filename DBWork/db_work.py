@@ -69,24 +69,6 @@ class DBWork:
     # ==============================================================
 
     def insert_into_purchases(self, date: str, product: str, cost: float, sum_: float) -> None:
-        # =================== Data is not empty ================
-        if date == '':
-            raise Exception(1, "Empty date or bad format")
-        if product == '':
-            raise Exception(3, "Empty product")
-        sum_ = sum_ if sum_ else cost
-        if cost is None:
-            raise Exception(5, "Empty cost/sum or bad format")
-
-        # =================== Value validation =================
-        try:
-            datetime.date.fromisoformat(date)
-        except Exception:
-            raise Exception(1, "Empty date or bad format")
-        if (float(cost) < 0) or (float(sum_) < 0):
-            raise Exception(6, "Cost/sum less then zero")
-        # ======================================================
-
         try:
             cursor = self.dbconn.cursor()
             cursor.execute(
@@ -110,24 +92,6 @@ class DBWork:
         self.dbconn.commit()
 
     def update_purchases(self, id_: int, date: str, product: str, cost: float, sum_: float) -> None:
-        # =================== Data is not empty ================
-        if date == '':
-            raise Exception(1, "Empty date or bad format")
-        if product == '':
-            raise Exception(3, "Empty product")
-        sum_ = sum_ if sum_ else cost
-        if cost is None:
-            raise Exception(5, "Empty cost/sum or bad format")
-
-        # =================== Value validation =================
-        try:
-            datetime.date.fromisoformat(date)
-        except Exception:
-            raise Exception(1, "Empty date or bad format")
-        if (float(cost) < 0) or (float(sum_) < 0):
-            raise Exception(6, "Cost/sum less then zero")
-        # ======================================================
-
         try:
             cursor = self.dbconn.cursor()
             cursor.execute(
@@ -145,7 +109,6 @@ class DBWork:
         self.dbconn.commit()
 
     def insert_into_categories(self, product: str, category: str) -> None:
-        # Check category
         try:
             cursor = self.dbconn.cursor()
             cursor.execute(
