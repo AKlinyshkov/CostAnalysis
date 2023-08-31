@@ -6,8 +6,6 @@ Empty cost/sum or bad format - 5
 Cost/sum less then zero - 6
 """
 
-import datetime
-import re
 import sqlite3
 
 
@@ -21,8 +19,8 @@ class DBWork:
     # ==============================================================
 
     def select_purchase_item(self, id_: int) -> tuple[int, str, str, float, float] | None:
+        cursor = self.dbconn.cursor()
         try:
-            cursor = self.dbconn.cursor()
             cursor.execute(f'SELECT * FROM purchases WHERE id = {id_}')
             purchase = cursor.fetchone()
         except Exception as exp:
@@ -32,8 +30,8 @@ class DBWork:
         return purchase
 
     def select_all_purchases(self) -> list[tuple[int, str, str, float, float]] | None:
+        cursor = self.dbconn.cursor()
         try:
-            cursor = self.dbconn.cursor()
             cursor.execute('SELECT id, date(date), product, cost, sum FROM purchases')
             all_purchases = cursor.fetchall()
         except Exception as exp:
@@ -43,8 +41,8 @@ class DBWork:
         return all_purchases
 
     def select_all_categories(self) -> list[tuple[str, str]] | None:
+        cursor = self.dbconn.cursor()
         try:
-            cursor = self.dbconn.cursor()
             cursor.execute('SELECT * FROM categories')
             all_categories = cursor.fetchall()
         except Exception as exp:
@@ -54,8 +52,8 @@ class DBWork:
         return all_categories
 
     def select_category_by_product(self, product: str) -> tuple[str, str] | None:
+        cursor = self.dbconn.cursor()
         try:
-            cursor = self.dbconn.cursor()
             cursor.execute(f"SELECT * FROM categories WHERE product = '{product}'")
             category = cursor.fetchone()
         except Exception as exp:
@@ -69,8 +67,8 @@ class DBWork:
     # ==============================================================
 
     def insert_into_purchases(self, date: str, product: str, cost: float, sum_: float) -> None:
+        cursor = self.dbconn.cursor()
         try:
-            cursor = self.dbconn.cursor()
             cursor.execute(
                 'INSERT INTO purchases (date, product, cost, sum) '
                 f"VALUES(date('{date}'), '{product}', '{cost}', '{sum_}')"
@@ -82,8 +80,8 @@ class DBWork:
         self.dbconn.commit()
 
     def delete_from_purchases(self, id_: int) -> None:
+        cursor = self.dbconn.cursor()
         try:
-            cursor = self.dbconn.cursor()
             cursor.execute(f'DELETE FROM purchases WHERE id = {id_}')
         except Exception as exp:
             raise exp
@@ -92,8 +90,8 @@ class DBWork:
         self.dbconn.commit()
 
     def update_purchases(self, id_: int, date: str, product: str, cost: float, sum_: float) -> None:
+        cursor = self.dbconn.cursor()
         try:
-            cursor = self.dbconn.cursor()
             cursor.execute(
                 'UPDATE purchases '
                 f"set date = date('{date}'), "
@@ -109,8 +107,8 @@ class DBWork:
         self.dbconn.commit()
 
     def insert_into_categories(self, product: str, category: str) -> None:
+        cursor = self.dbconn.cursor()
         try:
-            cursor = self.dbconn.cursor()
             cursor.execute(
                 'INSERT INTO categories(product, category) '
                 f"VALUES('{product}', '{category}')"
