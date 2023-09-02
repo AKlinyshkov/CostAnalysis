@@ -1,4 +1,5 @@
 import sqlite3
+import asyncio
 from dataclasses import dataclass
 
 
@@ -37,7 +38,7 @@ class DBWork:
     # Select data
     # ==============================================================
 
-    def select_purchase_item(self, id_: int) -> Purchase | None:
+    async def select_purchase_item(self, id_: int) -> Purchase | None:
         cursor = self.dbconn.cursor()
         try:
             cursor.execute(f'SELECT * FROM purchases WHERE id = {id_}')
@@ -49,7 +50,7 @@ class DBWork:
             cursor.close()
         return purchase
 
-    def select_all_purchases(self) -> list[Purchase] | None:
+    async def select_all_purchases(self) -> list[Purchase] | None:
         cursor = self.dbconn.cursor()
         try:
             cursor.execute('SELECT id, date(date), product, cost, sum FROM purchases')
@@ -69,7 +70,7 @@ class DBWork:
             cursor.close()
         return all_purchases
 
-    def select_all_categories(self) -> list[Category] | None:
+    async def select_all_categories(self) -> list[Category] | None:
         cursor = self.dbconn.cursor()
         try:
             cursor.execute('SELECT * FROM categories')
@@ -81,7 +82,7 @@ class DBWork:
             cursor.close()
         return all_categories
 
-    def select_category_by_product(self, product: str) -> Category | None:
+    async def select_category_by_product(self, product: str) -> Category | None:
         cursor = self.dbconn.cursor()
         try:
             cursor.execute(f"SELECT * FROM categories WHERE product = '{product}'")
@@ -97,7 +98,7 @@ class DBWork:
     # Insert Delete Update
     # ==============================================================
 
-    def insert_into_purchases(self, purchase: Purchase) -> None:
+    async def insert_into_purchases(self, purchase: Purchase) -> None:
         cursor = self.dbconn.cursor()
         try:
             cursor.execute(
@@ -111,7 +112,7 @@ class DBWork:
             cursor.close()
         self.dbconn.commit()
 
-    def delete_from_purchases(self, id_: int) -> None:
+    async def delete_from_purchases(self, id_: int) -> None:
         cursor = self.dbconn.cursor()
         try:
             cursor.execute(f'DELETE FROM purchases WHERE id = {id_}')
@@ -121,7 +122,7 @@ class DBWork:
             cursor.close()
         self.dbconn.commit()
 
-    def update_purchases(self, purchase: Purchase) -> None:
+    async def update_purchases(self, purchase: Purchase) -> None:
         cursor = self.dbconn.cursor()
         try:
             cursor.execute(
@@ -138,7 +139,7 @@ class DBWork:
             cursor.close()
         self.dbconn.commit()
 
-    def insert_into_categories(self, category: Category) -> None:
+    async def insert_into_categories(self, category: Category) -> None:
         cursor = self.dbconn.cursor()
         try:
             cursor.execute(
