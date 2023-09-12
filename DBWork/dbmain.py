@@ -4,13 +4,6 @@ from abc import ABC, abstractmethod
 
 @dataclass
 class Purchase:
-    """
-    date: str
-    product: str
-    cost: float
-    sum_: float
-    id_: int = 0
-    """
     date: str
     product: str
     cost: float
@@ -20,15 +13,12 @@ class Purchase:
 
 @dataclass
 class Category:
-    """
-    product: str
-    category: str
-    """
     product: str
     category: str
 
 
 class DBWork(ABC):
+
     # ==============================================================
     # Select data
     # ==============================================================
@@ -38,11 +28,11 @@ class DBWork(ABC):
         pass
 
     @abstractmethod
-    async def select_all_purchases(self) -> list[Purchase] | None:
+    async def select_all_purchases(self) -> list[Purchase]:
         pass
 
     @abstractmethod
-    async def select_all_categories(self) -> list[Category] | None:
+    async def select_all_categories(self) -> list[Category]:
         pass
 
     @abstractmethod

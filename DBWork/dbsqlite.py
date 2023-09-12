@@ -1,5 +1,5 @@
 import sqlite3
-from db_work import Purchase, Category, DBWork
+from dbmain import Purchase, Category, DBWork
 
 
 class DBSqlite(DBWork):
@@ -16,14 +16,20 @@ class DBSqlite(DBWork):
         try:
             cursor.execute(f'SELECT * FROM purchases WHERE id = {id_}')
             pur = cursor.fetchone()
-            purchase = Purchase(id_=pur[0], date=pur[1], product=pur[2], cost=pur[3], sum_=pur[4])
+            purchase = None if pur is None else Purchase(
+                id_=pur[0],
+                date=pur[1],
+                product=pur[2],
+                cost=pur[3],
+                sum_=pur[4]
+            )
         except Exception as exp:
             raise exp
         finally:
             cursor.close()
         return purchase
 
-    async def select_all_purchases(self) -> list[Purchase] | None:
+    async def select_all_purchases(self) -> list[Purchase]:
         cursor = self.dbconn.cursor()
         try:
             cursor.execute('SELECT id, date(date), product, cost, sum FROM purchases')
@@ -43,7 +49,7 @@ class DBSqlite(DBWork):
             cursor.close()
         return all_purchases
 
-    async def select_all_categories(self) -> list[Category] | None:
+    async def select_all_categories(self) -> list[Category]:
         cursor = self.dbconn.cursor()
         try:
             cursor.execute('SELECT * FROM categories')
@@ -60,7 +66,7 @@ class DBSqlite(DBWork):
         try:
             cursor.execute(f"SELECT * FROM categories WHERE product = '{product}'")
             cat = cursor.fetchone()
-            category = Category(product=cat[0], category=cat[1])
+            category = None if cat is None else Category(product=cat[0], category=cat[1])
         except Exception as exp:
             raise exp
         finally:
