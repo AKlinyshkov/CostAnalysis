@@ -20,8 +20,9 @@ class DBSqlite(DBWork):
                 id_=pur[0],
                 date=pur[1],
                 product=pur[2],
-                cost=pur[3],
-                sum_=pur[4]
+                desc=pur[3],
+                cost=pur[4],
+                sum_=pur[5]
             )
         except Exception as exp:
             raise exp
@@ -32,15 +33,16 @@ class DBSqlite(DBWork):
     async def select_all_purchases(self) -> list[Purchase]:
         cursor = self.dbconn.cursor()
         try:
-            cursor.execute('SELECT id, date(date), product, cost, sum FROM purchases')
+            cursor.execute('SELECT id, date(date), product, description, cost, sum FROM purchases')
             purs = cursor.fetchall()
             all_purchases = [
                 Purchase(
                     id_=pur[0],
                     date=pur[1],
                     product=pur[2],
-                    cost=pur[3],
-                    sum_=pur[4]
+                    desc=pur[3],
+                    cost=pur[4],
+                    sum_=pur[5]
                 ) for pur in purs
             ]
         except Exception as exp:
@@ -54,7 +56,10 @@ class DBSqlite(DBWork):
         try:
             cursor.execute('SELECT * FROM categories')
             categories = cursor.fetchall()
-            all_categories = [Category(product=cat[0], category=cat[1]) for cat in categories]
+            all_categories = [
+                Category(category=cat[0],
+                         product=cat[1],
+                         hint=cat[2]) for cat in categories]
         except Exception as exp:
             raise exp
         finally:
@@ -66,7 +71,7 @@ class DBSqlite(DBWork):
         try:
             cursor.execute(f"SELECT * FROM categories WHERE product = '{product}'")
             cat = cursor.fetchone()
-            category = None if cat is None else Category(product=cat[0], category=cat[1])
+            category = None if cat is None else Category(category=cat[0], product=cat[1], hint=cat[2])
         except Exception as exp:
             raise exp
         finally:
@@ -81,9 +86,9 @@ class DBSqlite(DBWork):
         cursor = self.dbconn.cursor()
         try:
             cursor.execute(
-                'INSERT INTO purchases (date, product, cost, sum) '
+                "INSERT INTO purchases (date, product, description, cost, sum) "
                 f"VALUES(date('{purchase.date}'), '{purchase.product}', "
-                f"'{purchase.cost}', '{purchase.sum_}')"
+                f"'{purchase.desc}', '{purchase.cost}', '{purchase.sum_}')"
             )
         except Exception as exp:
             raise exp
@@ -105,9 +110,10 @@ class DBSqlite(DBWork):
         cursor = self.dbconn.cursor()
         try:
             cursor.execute(
-                'UPDATE purchases '
+                "UPDATE purchases "
                 f"set date = date('{purchase.date}'), "
                 f"product = '{purchase.product}', "
+                f"description = '{purchase.desc}', "
                 f"cost = '{purchase.cost}', "
                 f"sum = '{purchase.sum_}' "
                 f"where id = {purchase.id_}"
@@ -122,8 +128,8 @@ class DBSqlite(DBWork):
         cursor = self.dbconn.cursor()
         try:
             cursor.execute(
-                'INSERT INTO categories(product, category) '
-                f"VALUES('{category.product}', '{category.category}')"
+                "INSERT INTO categories(category, product, hint) "
+                f"VALUES('{category.category}', '{category.product}', '{category.hint}')"
             )
         except Exception as exp:
             raise exp

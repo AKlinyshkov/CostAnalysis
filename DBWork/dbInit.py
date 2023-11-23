@@ -22,8 +22,9 @@ dbconn = sqlite3.connect(path)
 cur = dbconn.cursor()
 
 cur.execute("""CREATE TABLE IF NOT EXISTS categories (
+   category text NOT NULL,
    product text PRIMARY KEY,
-   category text NOT NULL
+   hint text
 );
 """)
 
@@ -31,6 +32,7 @@ cur.execute("""CREATE TABLE IF NOT EXISTS purchases (
    id INTEGER,
    date TEXT NOT NULL,
    product TEXT NOT NULL,
+   description TEXT,
    cost REAL NOT NULL,
    sum REAL NOT NULL,
    CONSTRAINT product_fk FOREIGN KEY (product) REFERENCES categories(product),

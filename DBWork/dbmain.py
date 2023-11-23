@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 class Purchase:
     date: str
     product: str
+    desc: str
     cost: float
     sum_: float
     id_: int = 0
@@ -13,8 +14,9 @@ class Purchase:
 
 @dataclass
 class Category:
-    product: str
     category: str
+    product: str
+    hint: str
 
 
 class DBWork(ABC):
