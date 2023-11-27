@@ -6,6 +6,27 @@ class DBSqlite(DBWork):
 
     def __init__(self, path: str) -> None:
         self.dbconn = sqlite3.connect(path)
+        self._pur_count = 0
+        cursor = self.dbconn.cursor()
+        try:
+            cursor.execute('SELECT COUNT(*) FROM purchases')
+            self.pur_count = cursor.fetchone()[0]
+        except Exception as exp:
+            raise exp
+        finally:
+            cursor.close()
+
+    # ==============================================================
+    # Work with purchases count
+    # ==============================================================
+
+    @property
+    def pur_count(self) -> int:
+        return self._pur_count
+
+    @pur_count.setter
+    def pur_count(self, value):
+        self._pur_count = value
 
     # ==============================================================
     # Select data
@@ -33,7 +54,31 @@ class DBSqlite(DBWork):
     async def select_all_purchases(self) -> list[Purchase]:
         cursor = self.dbconn.cursor()
         try:
-            cursor.execute('SELECT id, date(date), product, description, cost, sum FROM purchases')
+            cursor.execute('SELECT id, date(date), product, description, cost, sum '
+                           'FROM purchases ORDER BY date')
+            purs = cursor.fetchall()
+            all_purchases = [
+                Purchase(
+                    id_=pur[0],
+                    date=pur[1],
+                    product=pur[2],
+                    desc=pur[3],
+                    cost=pur[4],
+                    sum_=pur[5]
+                ) for pur in purs
+            ]
+        except Exception as exp:
+            raise exp
+        finally:
+            cursor.close()
+        return all_purchases
+
+    async def select_page_purchases(self, page_num: int, row_per_page: int) -> list[Purchase]:
+        cursor = self.dbconn.cursor()
+        try:
+            cursor.execute("SELECT id, date(date), product, description, cost, sum "
+                           "FROM purchases ORDER BY date "
+                           f"LIMIT {page_num * row_per_page}, {row_per_page}")
             purs = cursor.fetchall()
             all_purchases = [
                 Purchase(
@@ -90,6 +135,7 @@ class DBSqlite(DBWork):
                 f"VALUES(date('{purchase.date}'), '{purchase.product}', "
                 f"'{purchase.desc}', '{purchase.cost}', '{purchase.sum_}')"
             )
+            self._pur_count += 1
         except Exception as exp:
             raise exp
         finally:
@@ -100,6 +146,7 @@ class DBSqlite(DBWork):
         cursor = self.dbconn.cursor()
         try:
             cursor.execute(f'DELETE FROM purchases WHERE id = {id_}')
+            self._pur_count -= 1
         except Exception as exp:
             raise exp
         finally:

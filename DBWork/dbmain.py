@@ -22,6 +22,20 @@ class Category:
 class DBWork(ABC):
 
     # ==============================================================
+    # Work with purchases count
+    # ==============================================================
+
+    @property
+    @abstractmethod
+    def pur_count(self) -> int:
+        pass
+
+    @pur_count.setter
+    @abstractmethod
+    def pur_count(self, value):
+        pass
+
+    # ==============================================================
     # Select data
     # ==============================================================
 
@@ -31,6 +45,10 @@ class DBWork(ABC):
 
     @abstractmethod
     async def select_all_purchases(self) -> list[Purchase]:
+        pass
+
+    @abstractmethod
+    async def select_page_purchases(self, page_num: int, row_per_page: int) -> list[Purchase]:
         pass
 
     @abstractmethod
