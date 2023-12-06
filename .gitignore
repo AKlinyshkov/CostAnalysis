@@ -166,8 +166,5 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 runTest.cmd
-runTest.txt
 strategy.test
-expenses.xlsx
-dbwork/untitled_ui.py
-dbwork/untitled.ui
+*.xlsx
