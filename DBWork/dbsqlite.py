@@ -1,5 +1,5 @@
 import sqlite3
-from dbmain import Purchase, Category, DBWork
+from .dbmain import Purchase, Category, DBWork
 
 
 class DBSqlite(DBWork):
@@ -31,6 +31,8 @@ class DBSqlite(DBWork):
     # ==============================================================
     # Select data
     # ==============================================================
+
+    # ======================== Purchase ============================
 
     async def select_purchase_item(self, id_: int) -> Purchase | None:
         cursor = self.dbconn.cursor()
@@ -96,6 +98,8 @@ class DBSqlite(DBWork):
             cursor.close()
         return all_purchases
 
+    # ======================== Category ============================
+
     async def select_all_categories(self) -> list[Category]:
         cursor = self.dbconn.cursor()
         try:
@@ -104,7 +108,8 @@ class DBSqlite(DBWork):
             all_categories = [
                 Category(category=cat[0],
                          product=cat[1],
-                         hint=cat[2]) for cat in categories]
+                         hint=cat[2],
+                         id_=cat[3]) for cat in categories]
         except Exception as exp:
             raise exp
         finally:
@@ -116,16 +121,43 @@ class DBSqlite(DBWork):
         try:
             cursor.execute(f"SELECT * FROM categories WHERE product = '{product}'")
             cat = cursor.fetchone()
-            category = None if cat is None else Category(category=cat[0], product=cat[1], hint=cat[2])
+            category = None if cat is None else Category(
+                category=cat[0],
+                product=cat[1],
+                hint=cat[2],
+                id_=cat[3])
         except Exception as exp:
             raise exp
         finally:
             cursor.close()
         return category
 
+    async def select_page_categories(self, page_num: int, row_per_page: int) -> list[Category]:
+        cursor = self.dbconn.cursor()
+        try:
+            cursor.execute("SELECT * "
+                           "FROM categories ORDER BY category "
+                           f"LIMIT {page_num * row_per_page}, {row_per_page}")
+            cats = cursor.fetchall()
+            all_categories = [
+                Category(
+                    category=cat[0],
+                    product=cat[1],
+                    hint=cat[2],
+                    id_=cat[3]
+                ) for cat in cats
+            ]
+        except Exception as exp:
+            raise exp
+        finally:
+            cursor.close()
+        return all_categories
+
     # ==============================================================
     # Insert Delete Update
     # ==============================================================
+
+    # ======================== Purchase ============================
 
     async def insert_into_purchases(self, purchase: Purchase) -> None:
         cursor = self.dbconn.cursor()
@@ -171,13 +203,41 @@ class DBSqlite(DBWork):
             cursor.close()
         self.dbconn.commit()
 
+    # ======================== Category ============================
+
     async def insert_into_categories(self, category: Category) -> None:
         cursor = self.dbconn.cursor()
         try:
             cursor.execute(
-                "INSERT INTO categories(category, product, hint) "
+                "INSERT INTO categories (category, product, hint) "
                 f"VALUES('{category.category}', '{category.product}', '{category.hint}')"
             )
+        except Exception as exp:
+            raise exp
+        finally:
+            cursor.close()
+        self.dbconn.commit()
+
+    async def update_categories(self, category: Category) -> None:
+        cursor = self.dbconn.cursor()
+        try:
+            cursor.execute(
+                "UPDATE categories "
+                f"set category = '{category.category}', "
+                f"product = '{category.product}', "
+                f"hint = '{category.hint}' "
+                f"where id = {category.id_}"
+            )
+        except Exception as exp:
+            raise exp
+        finally:
+            cursor.close()
+        self.dbconn.commit()
+
+    async def delete_from_categories(self, id_: int) -> None:
+        cursor = self.dbconn.cursor()
+        try:
+            cursor.execute(f'DELETE FROM categories WHERE id = {id_}')
         except Exception as exp:
             raise exp
         finally:

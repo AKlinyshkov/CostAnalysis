@@ -23,8 +23,10 @@ cur = dbconn.cursor()
 
 cur.execute("""CREATE TABLE IF NOT EXISTS categories (
    category text NOT NULL,
-   product text PRIMARY KEY,
-   hint text
+   product text NOT NULL,
+   hint text,
+   id INTEGER,
+   CONSTRAINT categories_pk PRIMARY KEY(id)
 );
 """)
 
