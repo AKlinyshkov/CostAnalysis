@@ -10,16 +10,16 @@ from PyQt5 import QtCore, QtWidgets
 from dbwork.dbsqlite import DBSqlite
 from dbwork.dbmain import Purchase, DBWork
 import datetime
+import categories
 
+# import importlib.util
 
-import importlib.util
-
-spec = importlib.util.spec_from_file_location(
-    name="test_cat",  # note that ".test" is not a valid module name
-    location=".test/.test_UI_aux.py",
-)
-test_cat = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(test_cat)
+# spec = importlib.util.spec_from_file_location(
+#     name="test_cat",  # note that ".test" is not a valid module name
+#     location=".test/.test_UI_aux.py",
+# )
+# test_cat = importlib.util.module_from_spec(spec)
+# spec.loader.exec_module(test_cat)
 
 
 class PurchaseModel(QAbstractTableModel):
@@ -548,7 +548,7 @@ class PurchaseDialog(QDialog):
 
     def goToCat(self):
         # Вызов диалога внесения данных
-        category_dialog = test_cat.CategoryDialog(self.db)
+        category_dialog = categories.CategoryDialog(self.db)
         result = category_dialog.exec_()
 
 
