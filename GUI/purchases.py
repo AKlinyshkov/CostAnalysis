@@ -4,9 +4,9 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import asyncio
-from PyQt5.QtCore import Qt, QAbstractTableModel, QVariant
-from PyQt5.QtWidgets import QApplication, QVBoxLayout, QWidget, QDialog, QTableWidgetItem
-from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtCore import Qt, QAbstractTableModel, QVariant, QCoreApplication, QStringListModel
+from PyQt5.QtWidgets import QApplication, QListView, QDialog, QTableWidgetItem
+from PyQt5 import QtCore, QtWidgets, QtGui
 from dbwork.dbsqlite import DBSqlite
 from dbwork.dbmain import Purchase, DBWork
 import datetime
@@ -62,15 +62,78 @@ class PurchaseModel(QAbstractTableModel):
 
 
 class AddPurchaseDialog(AddItemDialog):
-    def __init__(self):
+    def __init__(self, db: DBWork):
 
         window_title = "Add new purchases"
-        window_size = (940, 445)
+        window_size = (940, 670)
         table_size = (20, 20, 900, 330)
         table_headers = ['Дата', 'Товар', 'Описание', 'Цена', 'Сумма']
         column_width = [(0, 80), (1, 200), (2, 400)]
+        hint_pos = (20, 400)
 
         super().__init__(window_title, window_size, table_size, table_headers, column_width)
+
+        # Add listview and comboBox for hint
+        self.addHint(db, hint_pos, window_size)
+
+    def addHint(self, db: DBWork, hint_pos: tuple[int, int], window_size: tuple[int, int]):
+
+        self.db = db
+
+        # Заголовок
+        self.labelHead = QtWidgets.QLabel(self)
+        self.labelHead.setObjectName("labelHead")
+        self.labelHead.setGeometry(QtCore.QRect(hint_pos[0], hint_pos[1], 280, 31))
+        fontHead = QtGui.QFont()
+        fontHead.setFamily(u"Verdana")
+        fontHead.setPointSize(11)
+        fontHead.setBold(True)
+        fontHead.setWeight(75)
+        self.labelHead.setFont(fontHead)
+        self.labelHead.setText(QCoreApplication.translate("Dialog", "Товары определенной категории", None))
+
+        # Пометка
+        self.labelCat = QtWidgets.QLabel(self)
+        self.labelCat.setObjectName("labelCat")
+        self.labelCat.setGeometry(QtCore.QRect(hint_pos[0], hint_pos[1] + 35, 85, 21))
+        fontCat = QtGui.QFont()
+        fontCat.setPointSize(11)
+        self.labelCat.setFont(fontCat)
+        self.labelCat.setText(QCoreApplication.translate("Dialog", "Категория:", None))
+
+        # Выпадающий список
+        self.comboBox = QtWidgets.QComboBox(self)
+        self.comboBox.setObjectName("comboBox")
+        self.comboBox.setGeometry(QtCore.QRect(hint_pos[0] + 90, hint_pos[1] + 35, 340, 24))
+
+        # Вывод текста
+        self.listView = QtWidgets.QListView(self)
+        self.listView.setObjectName("listView")
+        self.listView.setGeometry(QtCore.QRect(hint_pos[0], hint_pos[1] + 70, window_size[0] - 40, 130))
+        fontList = QtGui.QFont()
+        fontList.setPointSize(10)
+        self.listView.setFont(fontList)
+        self.listView.setAutoFillBackground(False)
+        self.listView.setStyleSheet(u"background-color: rgb(240, 240, 240);\n")
+
+        self.layout.addWidget(self.listView)
+        self.layout.addWidget(self.comboBox)
+
+        self.comboBox.activated.connect(self.changeCategory)
+        categories = asyncio.run(self.db.get_list_categories())
+        self.comboBox.addItems(categories)
+
+        # Инициализация модели данных
+        self.update_view_data(self.comboBox.currentText())
+
+    def changeCategory(self, _):
+        self.update_view_data(self.comboBox.currentText())
+
+    def update_view_data(self, category):
+        data = asyncio.run(self.db.select_product_by_category(category))
+        model = QStringListModel()
+        model.setStringList(data)
+        self.listView.setModel(model)
 
     def add_row_to_table(self):
         date = str(datetime.date.today())
@@ -197,7 +260,7 @@ class PurchaseDialog(ItemDialog):
 
     def addItem(self):
         # Вызов диалога внесения данных
-        add_purchase_dialog = AddPurchaseDialog()
+        add_purchase_dialog = AddPurchaseDialog(self.db)
         result = add_purchase_dialog.exec_()
 
         if result == QDialog.Accepted:
@@ -273,8 +336,6 @@ class PurchaseDialog(ItemDialog):
         # Вызов диалога внесения данных
         category_dialog = categories.CategoryDialog(self.db)
         category_dialog.exec_()
-
-
 
 
 if __name__ == "__main__":

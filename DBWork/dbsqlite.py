@@ -243,3 +243,35 @@ class DBSqlite(DBWork):
         finally:
             cursor.close()
         self.dbconn.commit()
+
+    # ==============================================================
+    # Auxilliary
+    # ==============================================================
+
+    async def get_list_categories(self) -> list[str]:
+        cursor = self.dbconn.cursor()
+        result = []
+        try:
+            cursor.execute("SELECT DISTINCT category FROM categories ORDER BY category;")
+            categories = cursor.fetchall()
+            for cat in categories:
+                result.append(cat[0])
+        except Exception as exp:
+            raise exp
+        finally:
+            cursor.close()
+            return result
+
+    async def select_product_by_category(self, category) -> list[str]:
+        cursor = self.dbconn.cursor()
+        result = []
+        try:
+            cursor.execute(f"SELECT product FROM categories where category = '{category}' ORDER BY product;")
+            products = cursor.fetchall()
+            for prod in products:
+                result.append(prod[0])
+        except Exception as exp:
+            raise exp
+        finally:
+            cursor.close()
+            return result

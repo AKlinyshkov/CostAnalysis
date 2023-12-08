@@ -97,3 +97,13 @@ class DBWork(ABC):
 
     async def delete_from_categories(self, id_: int) -> None:
         pass
+
+    # ==============================================================
+    # Auxilliary
+    # ==============================================================
+
+    async def get_list_categories(self) -> list[str] | None:
+        pass
+
+    async def select_product_by_category(self, category) -> list[str] | None:
+        pass

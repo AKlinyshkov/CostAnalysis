@@ -45,12 +45,12 @@ class AddItemDialog(QDialog):
         self.cancelData.clicked.connect(self.close)
 
         # Создаем макет и добавляем таблицу и кнопку
-        layout = QVBoxLayout()
-        layout.addWidget(self.tableWidget)
-        layout.addWidget(self.newRow)
-        layout.addWidget(self.delRow)
-        layout.addWidget(self.commitData)
-        layout.addWidget(self.cancelData)
+        self.layout = QVBoxLayout()
+        self.layout.addWidget(self.tableWidget)
+        self.layout.addWidget(self.newRow)
+        self.layout.addWidget(self.delRow)
+        self.layout.addWidget(self.commitData)
+        self.layout.addWidget(self.cancelData)
 
     def del_row_from_table(self):
         row_position = self.tableWidget.rowCount()

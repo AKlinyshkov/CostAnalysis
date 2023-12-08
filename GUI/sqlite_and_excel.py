@@ -5,33 +5,68 @@ from PyQt5.QtWidgets import (QMainWindow, QFileDialog, QApplication)
 
 
 def export2Excel():
-    # Подключение к базе данных SQLite
-    with open("DBWork/DBPath.txt", "r") as dbp:
-        dbpath = dbp.read()
-    conn = sqlite3.connect(dbpath)
-    cursor = conn.cursor()
+    try:
+        # Подключение к базе данных SQLite
+        with open("DBWork/DBPath.txt", "r") as dbp:
+            dbpath = dbp.read()
+        conn = sqlite3.connect(dbpath)
+        cursor = conn.cursor()
 
-    # Выполнение SQL-запроса для получения данных
-    cursor.execute('SELECT * FROM purchases')
-    rows = cursor.fetchall()
+        # Выполнение SQL-запроса для получения данных
+        cursor.execute('SELECT DISTINCT product FROM purchases ORDER BY product')
+        rows = cursor.fetchall()
 
-    # Создаем новую книгу Excel и получаем активный лист
-    workbook = Workbook()
-    sheet = workbook.active
+        # Создаем новую книгу Excel и получаем активный лист
+        workbook = Workbook()
+        sheetPur = workbook.active
+        sheetPur.title = "Purchases"
 
-    # Записываем заголовки столбцов
-    columns = [description[0] for description in cursor.description]
-    sheet.append(columns)
+        # Записываем заголовки столбцов
+        columns = [description[0] for description in cursor.description]
+        sheetPur.append(columns)
 
-    # Записываем данные в лист Excel
-    for row in rows:
-        sheet.append(row)
+        # Записываем данные в лист Excel
+        for row in rows:
+            sheetPur.append(row)
 
-    # Сохраняем книгу Excel
-    workbook.save('expenses.xlsx')
 
+    ######################################################################
+        # Выполнение SQL-запроса для получения данных
+        cursor.execute('SELECT category, product FROM categories ORDER BY product')
+        rows = cursor.fetchall()
+
+        # Создаем новую книгу Excel и получаем активный лист
+        sheetCat = workbook.create_sheet(title="Categories")
+
+        # Записываем заголовки столбцов
+        columns = [description[0] for description in cursor.description]
+        sheetCat.append(columns)
+
+        # Записываем данные в лист Excel
+        for row in rows:
+            sheetCat.append(row)
+
+    ########################################################################
+
+        class SelectDBPath(QMainWindow):
+
+            def __init__(self):
+                super().__init__()
+                self.path = QFileDialog.getExistingDirectory(self, "Select Excel destination", ".")
+
+
+        app = QApplication(sys.argv)
+        xDBPath = SelectDBPath()
+
+        path = xDBPath.path + "/expenses.xlsx"
+
+        # Сохраняем книгу Excel
+        workbook.save(path)
+    except Exception:
+        pass
+    finally:
     # Закрываем соединение с базой данных
-    conn.close()
+        conn.close()
 
 
 def import2Sqlite():
@@ -73,4 +108,4 @@ def import2Sqlite():
     conn.close()
 
 
-import2Sqlite()
+export2Excel()
