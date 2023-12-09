@@ -135,8 +135,8 @@ class ChangeItemDialog(QDialog):
         _translate = QtCore.QCoreApplication.translate
         self.Past.setText(_translate("Dialog", "^"))
         self.Next.setText(_translate("Dialog", "v"))
-        self.Change.setText(_translate("Dialog", "Выбрать"))
-        self.Commit.setText(_translate("Dialog", "Подтвердить"))
+        self.Change.setText(_translate("Dialog", "Подтвердить"))
+        self.Commit.setText(_translate("Dialog", "Готово"))
         self.Cancel.setText(_translate("Dialog", "Отмена"))
 
     def update_table_data(self, page_num):

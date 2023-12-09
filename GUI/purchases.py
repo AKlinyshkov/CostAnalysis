@@ -196,6 +196,108 @@ class EditPurchaseDialog(ChangeItemDialog):
         self.tableWidget.setItem(row, 6, QTableWidgetItem('Edited'))
 
 
+class EditUndefinedItem(ChangeItemDialog):
+    def __init__(self, db: DBWork):
+        window_title = "Edit undefined purchases"
+        window_size = (1070, 680)
+        table_size = (20, 20, 1030, 350)
+        table_headers = ['ID', 'Date', 'Product', 'Description', 'Cost', 'Sum', 'Status']
+        column_width = [(0, 10), (1, 80), (2, 200), (3, 400), (6, 80)]
+        hint_pos = (20, 420)
+
+        super().__init__(db, window_title, window_size, table_size, table_headers, column_width)
+
+        # Add listview and comboBox for hint
+        self.addHint(db, hint_pos, window_size)
+
+    def addHint(self, db: DBWork, hint_pos: tuple[int, int], window_size: tuple[int, int]):
+
+        self.db = db
+
+        # Заголовок
+        self.labelHead = QtWidgets.QLabel(self)
+        self.labelHead.setObjectName("labelHead")
+        self.labelHead.setGeometry(QtCore.QRect(hint_pos[0], hint_pos[1], 280, 31))
+        fontHead = QtGui.QFont()
+        fontHead.setFamily(u"Verdana")
+        fontHead.setPointSize(11)
+        fontHead.setBold(True)
+        fontHead.setWeight(75)
+        self.labelHead.setFont(fontHead)
+        self.labelHead.setText(QCoreApplication.translate("Dialog", "Товары определенной категории", None))
+
+        # Пометка
+        self.labelCat = QtWidgets.QLabel(self)
+        self.labelCat.setObjectName("labelCat")
+        self.labelCat.setGeometry(QtCore.QRect(hint_pos[0], hint_pos[1] + 35, 85, 21))
+        fontCat = QtGui.QFont()
+        fontCat.setPointSize(11)
+        self.labelCat.setFont(fontCat)
+        self.labelCat.setText(QCoreApplication.translate("Dialog", "Категория:", None))
+
+        # Выпадающий список
+        self.comboBoxCat = QtWidgets.QComboBox(self)
+        self.comboBoxCat.setObjectName("comboBoxCat")
+        self.comboBoxCat.setGeometry(QtCore.QRect(hint_pos[0] + 90, hint_pos[1] + 35, 340, 24))
+
+        # Вывод текста
+        self.listView = QtWidgets.QListView(self)
+        self.listView.setObjectName("listView")
+        self.listView.setGeometry(QtCore.QRect(hint_pos[0], hint_pos[1] + 70, window_size[0] - 40, 130))
+        fontList = QtGui.QFont()
+        fontList.setPointSize(10)
+        self.listView.setFont(fontList)
+        self.listView.setAutoFillBackground(False)
+        self.listView.setStyleSheet(u"background-color: rgb(240, 240, 240);\n")
+
+        # self.layout.addWidget(self.listView)
+        # self.layout.addWidget(self.comboBoxCat)
+
+        self.comboBoxCat.activated.connect(self.changeCategory)
+        categories = asyncio.run(self.db.get_list_categories())
+        self.comboBoxCat.addItems(categories)
+
+        # Инициализация модели данных
+        self.update_view_data(self.comboBoxCat.currentText())
+
+    def changeCategory(self, _):
+        self.update_view_data(self.comboBoxCat.currentText())
+
+    def update_view_data(self, category):
+        data = asyncio.run(self.db.select_product_by_category(category))
+        model = QStringListModel()
+        model.setStringList(data)
+        self.listView.setModel(model)
+
+    def rowCount(self):
+        return asyncio.run(self.db.select_count_specified_purchases("Неопределено"))
+
+    def update_table_data(self, page_num):
+        data = asyncio.run(self.db.select_specified_purchases("Неопределено", page_num, self.row_per_page))
+        self.tableWidget.setRowCount(len(data))
+
+        for row, purchase in enumerate(data):
+            self.tableWidget.setItem(row, 0, QTableWidgetItem(str(purchase.id_)))
+            self.tableWidget.setItem(row, 1, QTableWidgetItem(purchase.date))
+            self.tableWidget.setItem(row, 2, QTableWidgetItem(purchase.product))
+            self.tableWidget.setItem(row, 3, QTableWidgetItem(purchase.desc))
+            self.tableWidget.setItem(row, 4, QTableWidgetItem(str(purchase.cost)))
+            self.tableWidget.setItem(row, 5, QTableWidgetItem(str(purchase.sum_)))
+            self.tableWidget.setItem(row, 6, QTableWidgetItem('Old'))
+
+    def changeItem(self):
+        row = self.tableWidget.currentRow()
+
+        eitem = []
+        for col in range(self.tableWidget.columnCount()):
+            item = self.tableWidget.item(row, col)
+            item = item if item is not None else self.tableWidget.item(row, col-1)
+            eitem.append(item.text())
+
+        self.changedItems.append(Purchase(id_=eitem[0], date=eitem[1], product=eitem[2], desc=eitem[3], cost=float(eitem[4]), sum_=float(eitem[5])))
+        self.tableWidget.setItem(row, 6, QTableWidgetItem('Edited'))
+
+
 class DeletePurchaseDialog(ChangeItemDialog):
     def __init__(self, db: DBWork):
         window_title = "Delete purchases"
@@ -247,6 +349,31 @@ class PurchaseDialog(ItemDialog):
         self.go2Cat.setObjectName("go2Cat")
         self.go2Cat.setText(_translate("Dialog", "Categories"))
         self.go2Cat.clicked.connect(self.goToCat)
+
+        # Кнопка для вызова окна обработки неопределенных товаров
+        self.undef = QtWidgets.QPushButton(self)
+        self.undef.setGeometry(QtCore.QRect(100, 465, 75, 24))
+        self.undef.setObjectName("undef")
+        self.undef.setText(_translate("Dialog", "UndefPur"))
+        self.undef.clicked.connect(self.undefPur)
+
+    def undefPur(self):
+        # Вызов диалога внесения данных
+        undefPur_dialog = EditUndefinedItem(self.db)
+        result = undefPur_dialog.exec_()
+
+        if result == QDialog.Accepted:
+            # Получение данных
+            edited_purchases = undefPur_dialog.changedItems
+
+            # Внесение данных в БД
+            for pur in edited_purchases:
+                asyncio.run(self.db.update_purchases(pur))
+
+            # Обновление страницы
+            self.update_table_data(self.page_count - 1)
+            self.comboBox.setCurrentIndex(self.page_count - 1)
+            self.comboBox.currentIndexChanged.emit(self.page_count - 1)
 
     def rowCount(self):
         return self.db.pur_count

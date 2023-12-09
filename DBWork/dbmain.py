@@ -102,8 +102,18 @@ class DBWork(ABC):
     # Auxilliary
     # ==============================================================
 
+    # List all categories
     async def get_list_categories(self) -> list[str] | None:
         pass
 
+    # List all products of specified category (work with table Categories)
     async def select_product_by_category(self, category) -> list[str] | None:
+        pass
+
+    # Returns count of specified category purchases 
+    async def select_count_specified_purchases(self, product: str) -> int | None:
+        pass
+
+    # Returns purchases of specified category
+    async def select_specified_purchases(self, product: str, page_num: int, row_per_page: int) -> list[Purchase]:
         pass

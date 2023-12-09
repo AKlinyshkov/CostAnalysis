@@ -275,3 +275,38 @@ class DBSqlite(DBWork):
         finally:
             cursor.close()
             return result
+
+    async def select_count_specified_purchases(self, product: str) -> int:
+        cursor = self.dbconn.cursor()
+        try:
+            cursor.execute(f"SELECT COUNT(*) FROM purchases WHERE product = '{product}'")
+            purs = cursor.fetchall()
+            count = purs[0][0]
+        except Exception as exp:
+            raise exp
+        finally:
+            cursor.close()
+        return count
+
+    async def select_specified_purchases(self, product: str, page_num: int, row_per_page: int) -> list[Purchase]:
+        cursor = self.dbconn.cursor()
+        try:
+            cursor.execute("SELECT id, date(date), product, description, cost, sum "
+                           f"FROM purchases WHERE product = '{product}' ORDER BY date "
+                           f"LIMIT {page_num * row_per_page}, {row_per_page}")
+            purs = cursor.fetchall()
+            all_purchases = [
+                Purchase(
+                    id_=pur[0],
+                    date=pur[1],
+                    product=pur[2],
+                    desc=pur[3],
+                    cost=pur[4],
+                    sum_=pur[5]
+                ) for pur in purs
+            ]
+        except Exception as exp:
+            raise exp
+        finally:
+            cursor.close()
+        return all_purchases
