@@ -288,7 +288,11 @@ class DBSqlite(DBWork):
             cursor.close()
         return count
 
-    async def select_specified_purchases(self, product: str, page_num: int, row_per_page: int) -> list[Purchase]:
+    async def select_specified_purchases(self,
+                                         product: str,
+                                         page_num: int,
+                                         row_per_page: int
+                                         ) -> list[Purchase]:
         cursor = self.dbconn.cursor()
         try:
             cursor.execute("SELECT id, date(date), product, description, cost, sum "
@@ -310,3 +314,52 @@ class DBSqlite(DBWork):
         finally:
             cursor.close()
         return all_purchases
+
+    # ==============================================================
+    # Analyze
+    # ==============================================================
+
+    # Sum analyze
+
+    async def select_sum_by_day(self, period) -> list[tuple[str, float]] | None:
+        cursor = self.dbconn.cursor()
+        try:
+            cursor.execute("SELECT date, ROUND(SUM(sum), 2) AS SUM FROM purchases "
+                           f"WHERE date >= '{period[0]}' AND date <= '{period[1]}' "
+                           "GROUP BY date ORDER BY date")
+            result = cursor.fetchall()
+        except Exception as exp:
+            raise exp
+        finally:
+            cursor.close()
+        return result
+
+    async def select_sum_by_week(self, period) -> list[tuple[str, float]] | None:
+        cursor = self.dbconn.cursor()
+        try:
+            cursor.execute("SELECT strftime('%Y-%W', date) AS WEEK, ROUND(SUM(sum), 2) as SUM "
+                           "FROM purchases "
+                           f"WHERE WEEK >= strftime('%Y-%W', '{period[0]}') "
+                           f"AND WEEK <= strftime('%Y-%W', '{period[1]}') "
+                           "GROUP BY WEEK ORDER BY WEEK")
+            result = cursor.fetchall()
+        except Exception as exp:
+            raise exp
+        finally:
+            cursor.close()
+        return result
+
+    async def select_sum_by_month(self, period) -> list[tuple[str, float]] | None:
+        cursor = self.dbconn.cursor()
+        try:
+            cursor.execute("SELECT strftime('%Y-%m', date) AS MONTH, ROUND(SUM(sum), 2) as SUM "
+                           "FROM purchases "
+                           f"WHERE MONTH >= strftime('%Y-%m', '{period[0]}') "
+                           f"AND MONTH <= strftime('%Y-%m', '{period[1]}') "
+                           "GROUP BY MONTH ORDER BY MONTH")
+            result = cursor.fetchall()
+        except Exception as exp:
+            raise exp
+        finally:
+            cursor.close()
+        return result

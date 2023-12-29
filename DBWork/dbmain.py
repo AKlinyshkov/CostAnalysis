@@ -115,5 +115,25 @@ class DBWork(ABC):
         pass
 
     # Returns purchases of specified category
-    async def select_specified_purchases(self, product: str, page_num: int, row_per_page: int) -> list[Purchase]:
+    async def select_specified_purchases(
+            self,
+            product: str,
+            page_num: int,
+            row_per_page: int
+    ) -> list[Purchase] | None:
+        pass
+
+    # ==============================================================
+    # Analyze
+    # ==============================================================
+
+    # Sum analyze
+
+    async def select_sum_by_day(self, period) -> list[tuple[str, float]] | None:
+        pass
+
+    async def select_sum_by_week(self, period) -> list[tuple[str, float]] | None:
+        pass
+
+    async def select_sum_by_month(self, period) -> list[tuple[str, float]] | None:
         pass
